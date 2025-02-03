@@ -9,7 +9,18 @@ import os
 from model import Model
 
 
-def create_model(epochs: int, learning_rate: float =0.001, save: bool =False) -> Model:
+def create_model(epochs: int, error: float, learning_rate: float =0.001, save: bool =False) -> Model:
+    """Create and train CNN model.
+
+    Args:
+        epochs (int): maximum number of epochs
+        error (float): acceptable error value (0-1)
+        learning_rate (float, optional): Defaults to 0.001.
+        save (bool, optional): saves the model as "model.pth". Defaults to False.
+
+    Returns:
+        Model: model
+    """
     # Remove previous model
     if os.path.exists("model.pth"):
         os.remove("model.pth")
@@ -52,6 +63,10 @@ def create_model(epochs: int, learning_rate: float =0.001, save: bool =False) ->
         running_loss = 0.0
         correct = 0
         total = 0
+        running_error = float("inf")
+
+        if running_error <= error:
+            return
 
         for images, labels in train_loader:
             images, labels = images.to(device), labels.to(device)
@@ -73,6 +88,7 @@ def create_model(epochs: int, learning_rate: float =0.001, save: bool =False) ->
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
         
+        running_error = 1 - (correct / total)
         print(f"Epoch {epoch + 1}, Loss: {running_loss / len(train_loader):.3f}, Accuracy {correct / total:.3f}")
 
     ### TESTING
@@ -99,13 +115,19 @@ def create_model(epochs: int, learning_rate: float =0.001, save: bool =False) ->
     return model
 
 
-def load_model(device) -> Model:
+def load_model(device: torch.device) -> Model:
+    """Loads model with path "model/pth".
+
+    Args:
+        device (torch.device): define device to which the model is loaded
+
+    Returns:
+        Model: model
+    """
     # Model doesn't exist
     if not os.path.exists("model.pth"):
         return None
     
-    print(f"Using {device} device")
-
     model = Model()
     model.load_state_dict(torch.load("model.pth", map_location=device))
     model.to(device)

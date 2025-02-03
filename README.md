@@ -18,6 +18,9 @@ What technique is also typically used in CNN is max pooling. This operation is a
 
 The goal of this network is to make a classification based on taken feature maps. The network is trained to recognize classes (objects) based on their features. Type of this network could be the typical supervised model with error back propagation learning algorithm.
 
+## Implementation
+
+accuracy: 85.4%
 
 ## Notes
 
